@@ -117,13 +117,8 @@ class TestFileIterator(unittest.TestCase):
                 pass
     
     def test_nonexistentRoot(self):
-        try:
-            self.assertEqual(
-                [item for item in FileSystemIterator('None', False, False, None)],
-                []
-            )
-        except Exception as e:
-            self.assertIsInstance(e, Exception)
+        with self.assertRaises(FileNotFoundError):
+            FileSystemIterator('None', False, False, None)
 
     def test_emptyRoot(self):
         self.assertEqual(
@@ -151,7 +146,8 @@ class TestFileIterator(unittest.TestCase):
         self.assertRaises(StopIteration, next, iterator)
 
     def test_nextNonexistentRoot(self):
-        self.assertRaises(StopIteration, next, FileSystemIterator('None', False, False, None))
+        with self.assertRaises(FileNotFoundError):
+            next(FileSystemIterator('None', False, False, None))
     
     def test_nextEmptyRoot(self):
         self.assertRaises(StopIteration, next, FileSystemIterator(self.empty, False, False, None))
