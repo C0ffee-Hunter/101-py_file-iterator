@@ -121,7 +121,6 @@ class TestFileIterator(unittest.TestCase):
                 pass
     
     def test_nonexistentRoot(self):
-        # Expect empty list or raise error
         try:
             self.assertEqual(
                 [item for item in FileSystemIterator('None', False, False, None)],
