@@ -10,4 +10,5 @@ setup(
     long_description="",
     zip_safe=False,
     packages=['file_iterator'],
+    test_suite='tests',
 )
