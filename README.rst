@@ -8,4 +8,6 @@ Tests
 
 Для запуска тестов необходимо выполнить из директории проекта следующую команду:
 
-`python3 -m unittest discover tests`
+`
+python3 -m unittest discover tests
+`
