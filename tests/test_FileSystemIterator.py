@@ -1,19 +1,20 @@
 from file_iterator.FileSystemIterator import FileSystemIterator
 
 import unittest
-
+from pathlib import Path, WindowsPath, PosixPath
 import os
 import shutil
 
+
 class TestFileIterator(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
-        cls.empty = './tests/empty'
+        cls.empty = Path('./tests/empty')
         os.makedirs(cls.empty, exist_ok=True)
 
-        cls.root = './tests/root'
-
-        cls.dirs = [
+        cls.root = Path('./tests/root')
+        cls.dirs = list(map(Path, [
             './tests/root/subdir1',
             './tests/root/subdir1/subsubdir1',
             './tests/root/subdir1/subsubdir2',
@@ -26,9 +27,9 @@ class TestFileIterator(unittest.TestCase):
             './tests/root/subdir4',
             './tests/root/subdir5',
             './tests/root/subdir5/subsubdir6',
-        ]
+        ]))
 
-        cls.files = [
+        cls.files = list(map(Path, [
             './tests/root/file1.txt',
             './tests/root/file2.txt',
             './tests/root/subdir1/file3.jpg',
@@ -43,11 +44,11 @@ class TestFileIterator(unittest.TestCase):
             './tests/root/subtxtdir3/file12.cpp',
             './tests/root/subtxtdir3/file13.txt',
             './tests/root/subtxtdir3/subfile14.txt',
-        ]
+        ]))
 
         for dir in cls.dirs:
             os.makedirs(dir, exist_ok=True)
-        
+
         for file in cls.files:
             open(file, 'w').close()
 
@@ -57,23 +58,25 @@ class TestFileIterator(unittest.TestCase):
         shutil.rmtree(cls.root)
 
     def test_default(self):
+        print(len([item for item in FileSystemIterator(self.root, False, False, None)]))
+        print(len(self.dirs + self.files))
         self.assertCountEqual(
             [item for item in FileSystemIterator(self.root, False, False, None)],
             self.dirs + self.files
         )
-    
+
     def test_enableOnlyFiles(self):
         self.assertCountEqual(
             [item for item in FileSystemIterator(self.root, True, False, None)],
             self.files
         )
-    
+
     def test_enableOnlyDirs(self):
         self.assertCountEqual(
             [item for item in FileSystemIterator(self.root, False, True, None)],
             self.dirs
         )
-    
+
     def test_enableOnlyFilesAndOnlyDirs(self):
         with self.assertRaises(ValueError):
             for _ in FileSystemIterator(self.root, True, True, None):
@@ -83,7 +86,7 @@ class TestFileIterator(unittest.TestCase):
         self.assertCountEqual(
             [item for item in FileSystemIterator(self.root, False, False, 'txt')],
             [item for item in self.dirs if 'txt' in item] + \
-                [item for item in self.files if '.txt' in item]
+            [item for item in self.files if '.txt' in item]
         )
 
         self.assertCountEqual(
@@ -115,7 +118,7 @@ class TestFileIterator(unittest.TestCase):
         with self.assertRaises(TypeError):
             for _ in FileSystemIterator(None, None, None, None):
                 pass
-    
+
     def test_nonexistentRoot(self):
         with self.assertRaises(FileNotFoundError):
             FileSystemIterator('None', False, False, None)
@@ -125,30 +128,30 @@ class TestFileIterator(unittest.TestCase):
             [item for item in FileSystemIterator(self.empty, False, False, None)],
             []
         )
-    
+
     def test_nextOnlyFiles(self):
         iterator = FileSystemIterator(self.root, True, False, None)
         [next(iterator) for _ in range(len(self.files))]
-        
+
         # Checking for a new circle
-        self.assertRaises(StopIteration, next, iterator) # New circle initialization needed, e.g. iter.refresh()
-    
+        self.assertRaises(StopIteration, next, iterator)  # New circle initialization needed, e.g. iter.refresh()
+
     def test_nextOnlyDirs(self):
         iterator = FileSystemIterator(self.root, False, True, None)
         [next(iterator) for _ in range(len(self.dirs))]
         self.assertRaises(StopIteration, next, iterator)
-    
+
     def test_nextPattern(self):
         iterator = FileSystemIterator(self.root, False, False, 'txt')
         lst = [item for item in self.dirs if 'txt' in item] + \
-            [item for item in self.files if '.txt' in item]
+              [item for item in self.files if '.txt' in item]
         [next(iterator) for _ in range(len(lst))]
         self.assertRaises(StopIteration, next, iterator)
 
     def test_nextNonexistentRoot(self):
         with self.assertRaises(FileNotFoundError):
             next(FileSystemIterator('None', False, False, None))
-    
+
     def test_nextEmptyRoot(self):
         self.assertRaises(StopIteration, next, FileSystemIterator(self.empty, False, False, None))
 
