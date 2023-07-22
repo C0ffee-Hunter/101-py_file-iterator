@@ -1,50 +1,49 @@
 from file_iterator.FileSystemIterator import FileSystemIterator
 
 import unittest
-from pathlib import Path, WindowsPath, PosixPath
+from pathlib import Path
 import os
 import shutil
-
 
 class TestFileIterator(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.empty = Path('./tests/empty')
+        cls.empty = Path('./empty')
         os.makedirs(cls.empty, exist_ok=True)
 
-        cls.root = Path('./tests/root')
-        cls.dirs = list(map(str, map(Path, [
-            './tests/root/subdir1',
-            './tests/root/subdir1/subsubdir1',
-            './tests/root/subdir1/subsubdir2',
-            './tests/root/subdir1/subsubdir2/subsubsubdir1',
-            './tests/root/subdir1/subsubdir3',
-            './tests/root/subdir2',
-            './tests/root/subdir2/subsubtxtdir4',
-            './tests/root/subdir2/subsubdir5',
-            './tests/root/subtxtdir3',
-            './tests/root/subdir4',
-            './tests/root/subdir5',
-            './tests/root/subdir5/subsubdir6',
-        ])))
+        cls.root = Path('./root')
+        cls.dirs = list(map(Path, [
+            './root/subdir1',
+            './root/subdir1/subsubdir1',
+            './root/subdir1/subsubdir2',
+            './root/subdir1/subsubdir2/subsubsubdir1',
+            './root/subdir1/subsubdir3',
+            './root/subdir2',
+            './root/subdir2/subsubtxtdir4',
+            './root/subdir2/subsubdir5',
+            './root/subtxtdir3',
+            './root/subdir4',
+            './root/subdir5',
+            './root/subdir5/subsubdir6',
+        ]))
 
-        cls.files = list(map(str, map(Path, [
-            './tests/root/file1.txt',
-            './tests/root/file2.txt',
-            './tests/root/subdir1/file3.jpg',
-            './tests/root/subdir1/subsubdir1/file4.txt',
-            './tests/root/subdir1/subsubdir1/file5.docx',
-            './tests/root/subdir1/subsubdir1/file6',
-            './tests/root/subdir1/subsubdir3/file7.txt',
-            './tests/root/subdir1/subsubdir3/file8.doc',
-            './tests/root/subdir2/subsubtxtdir4/file9.txt',
-            './tests/root/subdir2/subsubtxtdir4/file10.py',
-            './tests/root/subdir2/subsubdir5/file11.c',
-            './tests/root/subtxtdir3/file12.cpp',
-            './tests/root/subtxtdir3/file13.txt',
-            './tests/root/subtxtdir3/subfile14.txt',
-        ])))
+        cls.files = list(map(Path, [
+            './root/file1.txt',
+            './root/file2.txt',
+            './root/subdir1/file3.jpg',
+            './root/subdir1/subsubdir1/file4.txt',
+            './root/subdir1/subsubdir1/file5.docx',
+            './root/subdir1/subsubdir1/file6',
+            './root/subdir1/subsubdir3/file7.txt',
+            './root/subdir1/subsubdir3/file8.doc',
+            './root/subdir2/subsubtxtdir4/file9.txt',
+            './root/subdir2/subsubtxtdir4/file10.py',
+            './root/subdir2/subsubdir5/file11.c',
+            './root/subtxtdir3/file12.cpp',
+            './root/subtxtdir3/file13.txt',
+            './root/subtxtdir3/subfile14.txt',
+        ]))
 
         for dir in cls.dirs:
             os.makedirs(dir, exist_ok=True)
@@ -59,20 +58,20 @@ class TestFileIterator(unittest.TestCase):
 
     def test_default(self):
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, False, False, None)],
-            self.dirs + self.files
+            [Path(item).parts for item in FileSystemIterator(self.root, False, False, None)],
+            [item.parts for item in self.dirs + self.files]
         )
 
     def test_enableOnlyFiles(self):
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, True, False, None)],
-            self.files
+            [Path(item).parts for item in FileSystemIterator(self.root, True, False, None)],
+            [item.parts for item in self.files]
         )
 
     def test_enableOnlyDirs(self):
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, False, True, None)],
-            self.dirs
+            [Path(item).parts for item in FileSystemIterator(self.root, False, True, None)],
+            [item.parts for item in self.dirs]
         )
 
     def test_enableOnlyFilesAndOnlyDirs(self):
@@ -81,35 +80,36 @@ class TestFileIterator(unittest.TestCase):
                 pass
 
     def test_pattern(self):
+        # проверить ещё раз этот тест и идти дальше
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, False, False, 'txt')],
-            [item for item in self.dirs if 'txt' in item] + \
-            [item for item in self.files if '.txt' in item]
+            [Path(item).parts for item in FileSystemIterator(self.root, False, False, 'txt')],
+            [Path(item).parts for item in self.dirs if 'txt' in str(item)] + \
+            [Path(item).parts for item in self.files if '.txt' in str(item)]
         )
 
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, True, False, 'txt')],
-            [item for item in self.files if '.txt' in item]
+            [Path(item).parts for item in FileSystemIterator(self.root, True, False, 'txt')],
+            [Path(item).parts for item in self.files if '.txt' in str(item)]
         )
 
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, True, False, 'c')],
-            [item for item in self.files if 'c' in item]
+            [Path(item).parts for item in FileSystemIterator(self.root, True, False, 'c')],
+            [Path(item).parts for item in self.files if 'c' in str(item)]
         )
 
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, False, True, 'txt')],
-            [item for item in self.dirs if 'txt' in item]
+            [Path(item).parts for item in FileSystemIterator(self.root, False, True, 'txt')],
+            [Path(item).parts for item in self.dirs if 'txt' in str(item)]
         )
 
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, False, True, 'sub')],
-            [item for item in self.dirs if 'sub' in item]
+            [Path(item).parts for item in FileSystemIterator(self.root, False, True, 'sub')],
+            [Path(item).parts for item in self.dirs if 'sub' in str(item)]
         )
 
         self.assertCountEqual(
-            [item for item in FileSystemIterator(self.root, False, True, 'subsub')],
-            [item for item in self.dirs if 'subsub' in item]
+            [Path(item).parts for item in FileSystemIterator(self.root, False, True, 'subsub')],
+            [Path(item).parts for item in self.dirs if 'subsub' in str(item)]
         )
 
     def test_emptyFields(self):
