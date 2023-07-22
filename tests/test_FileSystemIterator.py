@@ -14,7 +14,7 @@ class TestFileIterator(unittest.TestCase):
         os.makedirs(cls.empty, exist_ok=True)
 
         cls.root = Path('./tests/root')
-        cls.dirs = list(map(Path, [
+        cls.dirs = list(map(str, map(Path, [
             './tests/root/subdir1',
             './tests/root/subdir1/subsubdir1',
             './tests/root/subdir1/subsubdir2',
@@ -27,9 +27,9 @@ class TestFileIterator(unittest.TestCase):
             './tests/root/subdir4',
             './tests/root/subdir5',
             './tests/root/subdir5/subsubdir6',
-        ]))
+        ])))
 
-        cls.files = list(map(Path, [
+        cls.files = list(map(str, map(Path, [
             './tests/root/file1.txt',
             './tests/root/file2.txt',
             './tests/root/subdir1/file3.jpg',
@@ -44,7 +44,7 @@ class TestFileIterator(unittest.TestCase):
             './tests/root/subtxtdir3/file12.cpp',
             './tests/root/subtxtdir3/file13.txt',
             './tests/root/subtxtdir3/subfile14.txt',
-        ]))
+        ])))
 
         for dir in cls.dirs:
             os.makedirs(dir, exist_ok=True)
@@ -58,8 +58,6 @@ class TestFileIterator(unittest.TestCase):
         shutil.rmtree(cls.root)
 
     def test_default(self):
-        print(len([item for item in FileSystemIterator(self.root, False, False, None)]))
-        print(len(self.dirs + self.files))
         self.assertCountEqual(
             [item for item in FileSystemIterator(self.root, False, False, None)],
             self.dirs + self.files
